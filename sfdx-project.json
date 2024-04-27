@@ -6,7 +6,10 @@
       "package": "nn-lead-countries",
       "versionName": "ver 0.1",
       "versionNumber": "0.1.0.NEXT",
-      "versionDescription": "NN Salesforce exercise April 2024"
+      "versionDescription": "NN Salesforce exercise April 2024",
+      "unpackagedMetadata": {
+        "path": "unpackaged"
+      }
     }
   ],
   "name": "NNLeadsCountries",
