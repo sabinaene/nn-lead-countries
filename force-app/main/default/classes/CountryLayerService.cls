@@ -1,21 +1,11 @@
 public with sharing class CountryLayerService {
 
-    // existing Country__c records in the org
-    private Map<String, Country__c> existingCountriesByName = new Map<String, Country__c>();
-
-    // deserialised API response
-    private Map<String, ApiCountry> apiCountriesByName = new Map<String, ApiCountry>();
-
-    // collects list of Country__c records to insert/update
-    private List<Country__c> countriesToUpsert = new List<Country__c>();
-
-    // collects list of Country__c records to delete
-    private List<Country__c> countriesToDelete = new List<Country__c>();
-
     /**
      * Fetches all the Country__c records in the org
+     * @return List of all Country__c records
      */
-    private void getCountriesByName() {
+    public Map<String, Country__c> getCountriesByName() {
+        Map<String, Country__c> existingCountriesByName = new Map<String, Country__c>();
         List<Country__c> countries = [
             SELECT 
                 Name__c,
@@ -26,16 +16,21 @@ public with sharing class CountryLayerService {
             FROM Country__c
             WITH SECURITY_ENFORCED
         ];
+
         for(Country__c country : countries) {
-            this.existingCountriesByName.put(country.Name__c, country);
+            existingCountriesByName.put(country.Name__c, country);
         }
+
+        return existingCountriesByName;
     }
 
     /**
      * Calls CountryLayer API and deserialises reponse
      * into ApiCountry wrapper object
+     * @return Deserialised API response 
      */
-    private void getDeserializedApiResponse() {
+    public Map<String, ApiCountry> getDeserializedApiResponse() {
+        Map<String, ApiCountry> apiCountriesByName = new Map<String, ApiCountry>();
         CountryLayerAPI__c apiSettings = CountryLayerAPI__c.getInstance();
         // if no settings ==> error
         String apiKey = apiSettings.AccessKey__c;
@@ -49,24 +44,48 @@ public with sharing class CountryLayerService {
 
         List<ApiCountry> countries = (List<ApiCountry>)JSON.deserialize(res.getBody(), List<ApiCountry>.class);
         for(ApiCountry country : countries) {
-            this.apiCountriesByName.put(country.name, country);
+            apiCountriesByName.put(country.name, country);
         }
+
+        return apiCountriesByName;
+    }
+
+    /**
+     * Deletes Country__c records that don't have a match
+     * in the API response
+     * @param existingCountriesByName Country__c records mapped by Name__c
+     * @param apiCountriesByName API response countries mapped by name
+     */
+    public void deleteObsoleteCountries(
+        Map<String, Country__c> existingCountriesByName,
+        Map<String, ApiCountry> apiCountriesByName
+    ) {
+        List<Country__c> countriesToDelete = new List<Country__c>();
+        Set<String> existingCountryNamesNotInApi = new Set<String>(existingCountriesByName.keySet());
+        existingCountryNamesNotInApi.removeAll(apiCountriesByName.keySet());
+
+        for(String name : existingCountryNamesNotInApi) {
+            countriesToDelete.add(existingCountriesByName.get(name));
+        }
+
+        // FIXME: check crud etc
+        delete countriesToDelete;
     }
 	
     /**
-     * Compares existing Country__c record content with the API response
-     * and collects records to delete/upsert accordingly
+     * Updates Country__c records that are not up to date
+     * with the API response and inserts new ones if found
+     * @param existingCountriesByName Country__c records mapped by Name__c
+     * @param apiCountriesByName API response countries mapped by name
      */
-    private void checkCountryUpdates() {
-        Set<String> existingCountryNamesNotInApi = new Set<String>(this.existingCountriesByName.keySet());
-        existingCountryNamesNotInApi.removeAll(this.apiCountriesByName.keySet());
+    public void updateCountries(
+        Map<String, Country__c> existingCountriesByName,
+        Map<String, ApiCountry> apiCountriesByName
+    ) {
+        List<Country__c> countriesToUpsert = new List<Country__c>();
 
-        for(String name : existingCountryNamesNotInApi) {
-            this.countriesToDelete.add(this.existingCountriesByName.get(name));
-        }
-
-        for(ApiCountry country : this.apiCountriesByName.values()) {
-            Country__c record = this.existingCountriesByName.get(country.name);
+        for(ApiCountry country : apiCountriesByName.values()) {
+            Country__c record = existingCountriesByName.get(country.name);
             Boolean isRecordChanged = false;
 
             if(record == null) {
@@ -95,23 +114,12 @@ public with sharing class CountryLayerService {
             }
 
             if(isRecordChanged) {
-                this.countriesToUpsert.add(record);
+                countriesToUpsert.add(record);
             }
         }
-    }
 
-    /**
-     * Collects all data and executes updates.
-     * Callable from CountryLayerScheduler
-     */
-    public void executeUpdates() {
-        this.getCountriesByName();
-        this.getDeserializedApiResponse();
-        this.checkCountryUpdates();
-
-        // FIXME: check crud etc
-        delete this.countriesToDelete;
-        upsert this.countriesToUpsert;    
+        // FIXME: crud etc
+        upsert countriesToUpsert;
     }
 
     /**
