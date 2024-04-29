@@ -6,19 +6,26 @@ public with sharing class CountryLayerService {
      */
     public Map<String, Country__c> getCountriesByName() {
         Map<String, Country__c> existingCountriesByName = new Map<String, Country__c>();
-        List<Country__c> countries = [
-            SELECT 
-                Name__c,
-                Alpha2Code__c,
-                Alpha3Code__c,
-                CapitalCity__c,
-                Region__c
-            FROM Country__c
-            WITH SECURITY_ENFORCED
-        ];
+        
+        try {
+            List<Country__c> countries = [
+                SELECT 
+                    Name__c,
+                    Alpha2Code__c,
+                    Alpha3Code__c,
+                    CapitalCity__c,
+                    Region__c
+                FROM Country__c
+                WITH SECURITY_ENFORCED
+            ];
 
-        for(Country__c country : countries) {
-            existingCountriesByName.put(country.Name__c, country);
+            for(Country__c country : countries) {
+                existingCountriesByName.put(country.Name__c, country);
+            }
+        }
+        catch(Exception ex) {
+            // call log service
+            throw new CustomException(ex.getMessage());
         }
 
         return existingCountriesByName;
@@ -40,17 +47,30 @@ public with sharing class CountryLayerService {
         HttpRequest req = new HttpRequest();
         req.setEndpoint('http://api.countrylayer.com/v2/all?access_key=' + apiSettings.AccessKey__c);
         req.setMethod('GET');
-
         Http http = new Http();
-        HTTPResponse res = http.send(req);
+        HTTPResponse res;
 
-        if(res.getStatusCode() != 200 || String.isBlank(res.getBody()) || !res.getBody().startsWith('[')) {
+        try {
+            res = http.send(req);
+        }
+        catch(Exception ex) {
+            // call log service
+            throw new CustomException(ex.getMessage());
+        }
+
+        if(res.getStatusCode() != 200 || String.isBlank(res.getBody())) {
             throw new CustomException(res);
         }
 
-        List<ApiCountry> countries = (List<ApiCountry>)JSON.deserialize(res.getBody(), List<ApiCountry>.class);
-        for(ApiCountry country : countries) {
-            apiCountriesByName.put(country.name, country);
+        try {
+            List<ApiCountry> countries = (List<ApiCountry>)JSON.deserialize(res.getBody(), List<ApiCountry>.class);
+            for(ApiCountry country : countries) {
+                apiCountriesByName.put(country.name, country);
+            }
+        }
+        catch(Exception ex) {
+            // call log service
+            throw new CustomException(ex.getMessage());
         }
 
         return apiCountriesByName;

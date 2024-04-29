@@ -10,21 +10,16 @@ public with sharing class CustomException extends Exception {
     public CustomException(HttpResponse res) {
         String apiStatusMsg = 'API status ' + res.getStatusCode() + ': ';
 
-        if(String.isBlank(res.getBody()) || !res.getBody().startsWith('{')) {
+        if(String.isBlank(res.getBody())) {
             this.setMessage(apiStatusMsg + GENERIC_ERROR);
         }
 
         else {
-            try {
-                CountryLayerService.ApiError errorRes = (CountryLayerService.ApiError)JSON.deserialize(
-                    res.getBody(),
-                    CountryLayerService.ApiError.class
-                );
-                this.setMessage(apiStatusMsg + errorRes.error.info);
-            }
-            catch(Exception ex) {
-                this.setMessage(apiStatusMsg + GENERIC_ERROR);
-            }
+            CountryLayerService.ApiError errorRes = (CountryLayerService.ApiError)JSON.deserialize(
+                res.getBody(),
+                CountryLayerService.ApiError.class
+            );
+            this.setMessage(apiStatusMsg + errorRes.error.info);
         }
     }
 

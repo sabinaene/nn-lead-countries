@@ -7,7 +7,7 @@ public with sharing class CountryLayerScheduler implements Schedulable {
      * Async class to process API country data
      */
     public class AsyncCallout implements Queueable, Database.AllowsCallouts {
-        public void execute(QueueableContext qc) {    
+        public void execute(QueueableContext qc) {
             CountryLayerService service = new CountryLayerService();
             Map<String, Country__c> existingCountriesByName = service.getCountriesByName();
             Map<String, CountryLayerService.ApiCountry> apiCountriesByName = service.getDeserializedApiResponse();

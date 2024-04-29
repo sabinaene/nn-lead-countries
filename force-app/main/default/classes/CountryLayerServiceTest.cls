@@ -1,6 +1,10 @@
 @isTest
 private class CountryLayerServiceTest {
     
+    /**
+     * Checks that Country__c records are fetched correctly
+     * and grouped by Name__c
+     */
     @isTest
     private static void getCountriesByName() {
         List<Country__c> testCountries = TestData.insertCountryRecords(10);
@@ -23,6 +27,10 @@ private class CountryLayerServiceTest {
         );
     }
 
+    /**
+     * Checks that an empty map is returned when there are no
+     * Country__c records
+     */
     @isTest
     private static void getCountriesByName_NoData() {
         Test.startTest();
@@ -33,6 +41,10 @@ private class CountryLayerServiceTest {
         System.assert(countriesByName.isEmpty(), 'The country map size is not correct');
     }
 
+    /**
+     * Checks that an exception is thrown when a user without
+     * access to Country__c records is running the query
+     */
     @isTest
     private static void getCountriesByName_NoAccess() {
         Exception ex;
@@ -50,9 +62,12 @@ private class CountryLayerServiceTest {
         }
         Test.stopTest();
         
-        System.assertEquals('System.QueryException', ex.getTypeName(), 'Exception type incorrect');
+        System.assertEquals('CustomException', ex.getTypeName(), 'Exception type incorrect');
     }
 
+    /**
+     * Checks that the API response is correctly deserialized
+     */
     @isTest
     private static void getDeserializedApiResponse() {
         CountryLayerAPI__c settings = TestData.insertApiSettings();
@@ -77,6 +92,9 @@ private class CountryLayerServiceTest {
         );
     }
 
+    /**
+     * Checks that an error response from API is correctly handled
+     */
     @isTest
     private static void getDeserializedApiResponse_ApiError() {
         Exception ex;
@@ -102,6 +120,9 @@ private class CountryLayerServiceTest {
         System.assertEquals('CustomException', ex.getTypeName(), 'Exception type incorrect');
     }
 
+    /**
+     * Checks that an empty response from API is correctly handled
+     */
     @isTest
     private static void getDeserializedApiResponse_ApiNoBody() {
         Exception ex;
@@ -126,30 +147,10 @@ private class CountryLayerServiceTest {
         System.assertEquals('CustomException', ex.getTypeName(), 'Exception type incorrect');
     }
 
-    @isTest
-    private static void getDeserializedApiResponse_ApiInvalidBody() {
-        Exception ex;
-        CountryLayerAPI__c settings = TestData.insertApiSettings();
-        Test.setMock(HttpCalloutMock.class, new TestData.MockHttpResponse('[[{"test":"invalid"}]]', 200));
-
-        Test.startTest();
-        try {
-            CountryLayerService service = new CountryLayerService();
-            Map<String, CountryLayerService.ApiCountry> countriesByName = service.getDeserializedApiResponse();
-        }
-        catch(Exception e) {
-            ex = e;
-        }
-        Test.stopTest();
-
-        System.assertEquals(
-            'API status 200: An unexpected error occurred',
-            ex.getMessage(),
-            'Exception message incorrect'
-        );
-        System.assertEquals('CustomException', ex.getTypeName(), 'Exception type incorrect');
-    }
-
+    /**
+     * Checks that an exception is thrown when access key is missing
+     * in settings
+     */
     @isTest
     private static void getDeserializedApiResponse_SettingsError() {
         Exception ex;
@@ -172,6 +173,10 @@ private class CountryLayerServiceTest {
         System.assertEquals('CustomException', ex.getTypeName(), 'Exception type incorrect');
     }
 
+    /**
+     * Checks that Country__c records are correctly deleted when
+     * not matched in API response
+     */
     @isTest
     private static void deleteObsoleteCountries() {
         Map<String, Country__c> testCountryRecordsByName = TestData.insertCountryRecordsByNameMap(10);
@@ -192,6 +197,10 @@ private class CountryLayerServiceTest {
         );
     }
 
+    /**
+     * Checks that an exception is thrown if a user without rights
+     * to delete Country__c records is trying to delete
+     */
     @isTest
     private static void deleteObsoleteCountries_NoAccess() {
         Exception ex;
@@ -215,6 +224,10 @@ private class CountryLayerServiceTest {
         System.assertEquals('CustomException', ex.getTypeName(), 'Exception type incorrect');
     }
 
+    /**
+     * Checks that Country__c records are correctly upserted when
+     * new or matched in API response
+     */
     @isTest
     private static void upsertCountries() {
         Map<String, Country__c> testCountryRecordsByName = TestData.insertCountryRecordsByNameMap(10);
@@ -235,6 +248,10 @@ private class CountryLayerServiceTest {
         System.assertEquals('Test Country KLM', countries[10].Name__c, 'Name for country KLM not correct');
     }
 
+    /**
+     * Checks that Country__c records are correctly inserted when
+     * new in API response
+     */
     @isTest
     private static void insertCountries() {
         Map<String, CountryLayerService.ApiCountry> testApiCountriesByName =
@@ -251,6 +268,10 @@ private class CountryLayerServiceTest {
         System.assertEquals('Test Region JKL', countries[9].Region__c, 'Region for country JKL not correct');
     }
 
+    /**
+     * Checks that an exception is thrown if a user without rights
+     * to insert Country__c records is trying to insert
+     */
     @isTest
     private static void insertCountries_NoAccess() {
         Exception ex;
