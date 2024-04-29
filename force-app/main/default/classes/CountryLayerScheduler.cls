@@ -12,7 +12,7 @@ public with sharing class CountryLayerScheduler implements Schedulable {
             Map<String, Country__c> existingCountriesByName = service.getCountriesByName();
             Map<String, CountryLayerService.ApiCountry> apiCountriesByName = service.getDeserializedApiResponse();
 
-            service.updateCountries(existingCountriesByName, apiCountriesByName);
+            service.upsertCountries(existingCountriesByName, apiCountriesByName);
             service.deleteObsoleteCountries(existingCountriesByName, apiCountriesByName);
         }
     }

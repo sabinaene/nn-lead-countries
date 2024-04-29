@@ -32,15 +32,21 @@ public with sharing class CountryLayerService {
     public Map<String, ApiCountry> getDeserializedApiResponse() {
         Map<String, ApiCountry> apiCountriesByName = new Map<String, ApiCountry>();
         CountryLayerAPI__c apiSettings = CountryLayerAPI__c.getInstance();
-        // if no settings ==> error
-        String apiKey = apiSettings.AccessKey__c;
+        
+        if(apiSettings == null || String.isBlank(apiSettings.AccessKey__c)) {
+            throw new CustomException('Missing access key in settings.');
+        }
 
         HttpRequest req = new HttpRequest();
-        req.setEndpoint('http://api.countrylayer.com/v2/all?access_key=' + apiKey);
+        req.setEndpoint('http://api.countrylayer.com/v2/all?access_key=' + apiSettings.AccessKey__c);
         req.setMethod('GET');
 
         Http http = new Http();
         HTTPResponse res = http.send(req);
+
+        if(res.getStatusCode() != 200 || String.isBlank(res.getBody()) || !res.getBody().startsWith('[')) {
+            throw new CustomException(res);
+        }
 
         List<ApiCountry> countries = (List<ApiCountry>)JSON.deserialize(res.getBody(), List<ApiCountry>.class);
         for(ApiCountry country : countries) {
@@ -68,8 +74,14 @@ public with sharing class CountryLayerService {
             countriesToDelete.add(existingCountriesByName.get(name));
         }
 
-        // FIXME: check crud etc
-        delete countriesToDelete;
+        Database.DeleteResult[] results = Database.delete(countriesToDelete, false);
+        List<Database.Error> errors = new List<Database.Error>();
+        for(Database.DeleteResult dr : results) {
+            errors.addAll(dr.getErrors());
+        }
+        if(!errors.isEmpty()) {
+            throw new CustomException(errors);
+        }
     }
 	
     /**
@@ -78,7 +90,7 @@ public with sharing class CountryLayerService {
      * @param existingCountriesByName Country__c records mapped by Name__c
      * @param apiCountriesByName API response countries mapped by name
      */
-    public void updateCountries(
+    public void upsertCountries(
         Map<String, Country__c> existingCountriesByName,
         Map<String, ApiCountry> apiCountriesByName
     ) {
@@ -118,8 +130,14 @@ public with sharing class CountryLayerService {
             }
         }
 
-        // FIXME: crud etc
-        upsert countriesToUpsert;
+        List<Database.UpsertResult> results = Database.upsert(countriesToUpsert, false);
+        List<Database.Error> errors = new List<Database.Error>();
+        for(Database.UpsertResult ur : results) {
+            errors.addAll(ur.getErrors());
+        }
+        if(!errors.isEmpty()) {
+            throw new CustomException(errors);
+        }
     }
 
     /**
@@ -131,5 +149,17 @@ public with sharing class CountryLayerService {
         public String alpha3Code;
         public String capital;
         public String region;
+    }
+
+    
+    /**
+     * Wrapper objects for API error response
+     */
+    public class ApiError {
+        public ApiErrorInfo error;
+    }
+
+    public class ApiErrorInfo {
+        public String info;
     }
 }
