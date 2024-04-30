@@ -9,7 +9,7 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     container:
-      image: salesforcedx:latest-full
+      image: salesforce/cli:latest-full
     steps:
       - name: Create Scratch Org
         run: |
