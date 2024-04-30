@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>MissingFieldsForOwnerChange</fullName>
+    <active>true</active>
+    <description>Checks that required fields are filled in before changing Lead Owner: Lead Source, Country (except System Administrator), Number of Employees (except System Administrator and Contract Manager).</description>
+    <errorConditionFormula>AND(
+  NOT($Setup.GeneralSettings__c.DisableAutomation__c),
+  ISCHANGED(OwnerId), 
+  OR(
+    AND(
+      $Profile.Name = &quot;System Administrator&quot;,
+      ISBLANK(TEXT(LeadSource))
+    ),
+    AND(
+      $Profile.Name = &quot;Contract Manager&quot;,
+      OR(ISBLANK(TEXT(LeadSource)), ISBLANK(Country))
+    ),
+    AND(
+      $Profile.Name &lt;&gt; &quot;Contract Manager&quot;,
+      $Profile.Name &lt;&gt; &quot;System Administrator&quot;,
+      OR(ISBLANK(TEXT(LeadSource)), ISBLANK(NumberOfEmployees), ISBLANK(Country))
+    )
+  )
+)</errorConditionFormula>
+    <errorDisplayField>OwnerId</errorDisplayField>
+    <errorMessage>You must fill in the following before changing the Lead Owner: Lead Source, Country (except System Administrator), Number of Employees (except System Administrator and Contract Manager).</errorMessage>
+</ValidationRule>

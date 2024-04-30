@@ -40,4 +40,39 @@ private class LeadTriggerHandlerTest {
         System.assertEquals(null, testLeads[5].CountryAlpha3code__c, 'Alpha3Code is not null');
     }
 
+    /**
+     * Checks that User can't query Country__c records
+     */
+    @isTest
+    private static void canQueryCountries_ContractManager() {
+        User testUser = TestData.createUsers(1, 'Contract Manager')[0];
+        Boolean hasPermission;
+
+        Test.startTest();
+        System.runAs(testUser) {
+            hasPermission = LeadTriggerHandler.canQueryCountries();
+        }
+        Test.stopTest();
+
+        System.assertEquals(false, hasPermission, 'User should not be able to query countries');
+    }
+
+    /**
+     * Checks that User can query Country__c records
+     */
+    @isTest
+    private static void canQueryCountries_ReadCountriesPermSet() {
+        User testUser = TestData.insertUsers(1, 'Contract Manager')[0];
+        TestData.assignPermissionSet(new List<Id>{ testUser.Id }, 'ReadCountries');
+        Boolean hasPermission;
+
+        Test.startTest();
+        System.runAs(testUser) {
+            hasPermission = LeadTriggerHandler.canQueryCountries();
+        }
+        Test.stopTest();
+
+        System.assertEquals(true, hasPermission, 'User should be able to query countries');
+    }
+
 }

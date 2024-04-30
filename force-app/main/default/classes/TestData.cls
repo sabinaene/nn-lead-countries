@@ -174,6 +174,12 @@ public class TestData {
         return settings;
     }
 
+    /**
+     * Creates User records without inserting
+     * @param userCount Number of users to create
+     * @param profileName Name of profile to assign to users
+     * @return List of users
+     */
     public static List<User> createUsers(Integer userCount, String profileName) {
         Id profileId = [SELECT Id FROM Profile WHERE Name = :profileName].Id;
         List<User> users = new List<User>();
@@ -194,6 +200,37 @@ public class TestData {
             ));
         }
         return users;
+    }
+
+    /**
+     * Inserts User records
+     * @param userCount Number of users to create
+     * @param profileName Name of profile to assign to users
+     * @return List of users after insert
+     */
+    public static List<User> insertUsers(Integer userCount, String profileName) {
+        List<User> users = createUsers(userCount, profileName);
+        insert users;
+        return users;
+    }
+
+    /**
+     * Assigns permission set to users
+     * @param userIds List of users IDs to assign perm set to
+     * @param permissionSetName Name of perm set to assign
+     */
+    public static void assignPermissionSet(List<Id> userIds, String permissionSetName) {
+        Id permissionSetId = [SELECT Id FROM PermissionSet WHERE Name = :permissionSetName].Id;
+        List<PermissionSetAssignment> assignments = new List<PermissionSetAssignment>();
+
+        for(Id userId : userIds) {
+            assignments.add(new PermissionSetAssignment(
+                AssigneeId = userId,
+                PermissionSetId = permissionSetId
+            ));
+        }
+
+        insert assignments;
     }
 
     /**

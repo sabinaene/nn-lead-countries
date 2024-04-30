@@ -5,18 +5,20 @@ public with sharing class LeadTriggerHandler {
      * @param newLeads List of new Leads records before save
      */
     public static void beforeInsert(List<Lead> newLeads) {
-        List<String> countryNames = new List<String>();
-        List<Lead> leadsToUpdate = new List<Lead>();
+        if(canQueryCountries()) {
+            List<String> countryNames = new List<String>();
+            List<Lead> leadsToUpdate = new List<Lead>();
 
-        for(Lead ld : newLeads) {
-            if(!String.isBlank(ld.Country)) {
-                leadsToUpdate.add(ld);
-                countryNames.add(ld.Country);
+            for(Lead ld : newLeads) {
+                if(!String.isBlank(ld.Country)) {
+                    leadsToUpdate.add(ld);
+                    countryNames.add(ld.Country);
+                }
             }
-        }
 
-        Map<String, Country__c> countriesByName = CountryLayerService.getCountriesByName();
-        updateLeadsWithCountries(leadsToUpdate, countriesByName);
+            Map<String, Country__c> countriesByName = CountryLayerService.getCountriesByName();
+            updateLeadsWithCountries(leadsToUpdate, countriesByName);
+        }
     }
 
     /**
@@ -25,18 +27,32 @@ public with sharing class LeadTriggerHandler {
      * @param oldLeadMap Map with old versions of newly updated Lead records, by ID
      */
     public static void beforeUpdate(List<Lead> newLeads, Map<Id, Lead> oldLeadMap) {
-        List<String> countryNames = new List<String>();
-        List<Lead> leadsToUpdate = new List<Lead>();
+        if(canQueryCountries()) {
+            List<String> countryNames = new List<String>();
+            List<Lead> leadsToUpdate = new List<Lead>();
 
-        for(Lead ld : newLeads) {
-            if(ld.Country != oldLeadMap.get(ld.Id).Country) {
-                leadsToUpdate.add(ld);
-                countryNames.add(ld.Country);
+            for(Lead ld : newLeads) {
+                if(ld.Country != oldLeadMap.get(ld.Id).Country) {
+                    leadsToUpdate.add(ld);
+                    countryNames.add(ld.Country);
+                }
             }
-        }
 
-        Map<String, Country__c> countriesByName = CountryLayerService.getCountriesByName();
-        updateLeadsWithCountries(leadsToUpdate, countriesByName);
+            Map<String, Country__c> countriesByName = CountryLayerService.getCountriesByName();
+            updateLeadsWithCountries(leadsToUpdate, countriesByName);
+        }
+    }
+
+    /**
+     * Checks if the current user has permission to query Country__c
+     * @return Has/doesn't have permission
+     */
+    @TestVisible
+    private static Boolean canQueryCountries() {
+        return SObjectType.Country__c.fields.CapitalCity__c.isAccessible() &&
+            SObjectType.Country__c.fields.Region__c.isAccessible() &&
+            SObjectType.Country__c.fields.Alpha2Code__c.isAccessible() &&
+            SObjectType.Country__c.fields.Alpha3Code__c.isAccessible();
     }
 
     /**
