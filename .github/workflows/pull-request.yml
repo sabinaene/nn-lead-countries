@@ -13,7 +13,8 @@ jobs:
     steps:
       - name: Create Scratch Org
         run: |
-          echo ${{ vars.SF_HUB_SFDXURL }} | sf org login sfdx-url --sfdx-url-stdin --alias DevHub --set-default-dev-hub
+          echo ${{ vars.SF_HUB_SFDXURL }} > devhub.json
+          sf org login sfdx-url --sfdx-url-file devhub.json --alias DevHub --set-default-dev-hub
 
           echo "Creating scratch org..."
           sf org create scratch --definition-file config/project-scratch-def.json --alias TestOrg --set-default --no-track-source --duration-days 1
