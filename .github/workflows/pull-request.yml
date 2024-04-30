@@ -6,63 +6,36 @@ on:
     branches: [ main ]
 
 jobs:
-  org:create:
+  tests:
     runs-on: ubuntu-latest
-    uses: actions/cache@v3
-    with:
-      path: [ cache ]
-      key: config
+    container:
+      image: salesforce/cli:latest-full
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        
       - name: Create Scratch Org
         run: |
-          npm install @salesforce/cli --global && sf --version
-          echo $SF_HUB_SFDXURL | sf org login sfdx-url --sfdx-url-stdin --alias DevHub --set-default-dev-hub
+          echo ${{ vars.SF_HUB_SFDXURL }} > devhub.txt
+          sf org login sfdx-url --sfdx-url-file devhub.txt --alias DevHub --set-default-dev-hub
           sf org create scratch --definition-file config/project-scratch-def.json --alias TestOrg --set-default --no-track-source --duration-days 1
           sf project deploy start --target-org TestOrg
-          cp -r /root/.sfdx cache || echo "No sfdx cache found"
-
-  test:run:
-    runs-on: ubuntu-latest
-    uses: actions/cache@v3
-    with:
-      path: [ cache ]
-      key: config
-    steps:
+      
       - name: Run Tests
         run: |
-          mv cache /root/.sfdx || echo "No sfdx cache found"
-          npm install jq && jq --version
-          sf apex run test --target-org TestOrg --wait 10 --code-coverage --output-dir test-coverage
-
-          if [ ! -r test-coverage/test-run-id.txt ]; then
-            echo "\nFATAL ERROR: Could not load test-coverage result files. Files not found.\n"
-            exit 1
-          fi
-
-          APEX_JOB_ID=$(<test-coverage/test-run-id.txt)
-          METHODS_FAILED=($(jq -r '.summary.failing' test-coverage/test-result-$APEX_JOB_ID.json))
-          APEX_COVERAGE=($(jq -r '.summary.orgWideCoverage' test-coverage/test-result-$APEX_JOB_ID.json))
+          sf apex run test --target-org TestOrg --wait 10 --code-coverage
+          sf data query --query "SELECT PercentCovered FROM ApexOrgWideCoverage" --use-tooling-api --target-org TestOrg --json > coverage.json
+          
+          APEX_COVERAGE=$(jq -r '.result.records[0].PercentCovered' coverage.json)
 
           echo "Org Wide Test Coverage = "$APEX_COVERAGE
 
-          if [ $METHODS_FAILED -lt 0 ]; then
-            echoErrorMsg "$METHODS_FAILED test method(s) failed, please check above for further details."
+          if [ ${APEX_COVERAGE} -lt 80 ]; then
+            echo "The Apex test run coverage is $APEX_COVERAGE - less than 80%"
             exit 1
           fi
-
-          if [ ${APEX_COVERAGE%\%} -lt 80 ]; then
-            echoErrorMsg "The Apex test run coverage is $APEX_COVERAGE - less than 80%"
-            exit 1
-          fi
-
-  org:delete:
-    runs-on: ubuntu-latest
-    uses: actions/cache@v3
-    with:
-      path: [ cache ]
-      key: config
-    steps:
+        
       - name: Delete Scratch Org
         run: |
-          mv cache /root/.sfdx || echo "No sfdx cache found"
+          echo "Deleting scratch org..."
           sf org delete scratch --target-org TestOrg --no-prompt
