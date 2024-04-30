@@ -23,19 +23,14 @@ jobs:
       
       - name: Run Tests
         run: |
-          sf apex run test --target-org TestOrg --wait 10 --code-coverage --output-dir test-coverage
-
-          if [ ! -r test-coverage/test-run-id.txt ]; then
-            echo "\nFATAL ERROR: Could not load test-coverage result files. Files not found.\n"
-            exit 1
-          fi
-
-          APEX_JOB_ID=$(<test-coverage/test-run-id.txt)
-          APEX_COVERAGE=$(jq -r '.summary.orgWideCoverage' test-coverage/test-result-$APEX_JOB_ID.json)
+          sf apex run test --target-org TestOrg --wait 10
+          sf data query --query "SELECT PercentCovered FROM ApexOrgWideCoverage" --use-tooling-api --target-org TestOrg --json > coverage.json
+          
+          APEX_COVERAGE=$(jq -r '.result.records.PercentCovered' coverage.json)
 
           echo "Org Wide Test Coverage = "$APEX_COVERAGE
 
-          if [ ${APEX_COVERAGE%\%} -lt 80 ]; then
+          if [ ${APEX_COVERAGE} -lt 80 ]; then
             echo "The Apex test run coverage is $APEX_COVERAGE - less than 80%"
             exit 1
           fi
