@@ -3,7 +3,7 @@
     <fullName>CountryRegion__c</fullName>
     <description>Region of the country set in the Address field, populated from the CountryLayer API.</description>
     <externalId>false</externalId>
-    <label>CountryRegion</label>
+    <label>Country Region</label>
     <length>160</length>
     <required>false</required>
     <trackFeedHistory>false</trackFeedHistory>
