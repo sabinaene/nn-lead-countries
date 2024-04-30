@@ -11,7 +11,8 @@ jobs:
     container:
       image: salesforce/cli:latest-full
     steps:
-      - name: Create Scratch Org
+      - name: Create org and run tests
+        uses: actions/checkout@v3
         run: |
           echo ${{ vars.SF_HUB_SFDXURL }} > devhub.txt
           sf org login sfdx-url --sfdx-url-file devhub.txt --alias DevHub --set-default-dev-hub
@@ -19,7 +20,6 @@ jobs:
           echo "Creating scratch org..."
           sf org create scratch --definition-file config/project-scratch-def.json --alias TestOrg --set-default --no-track-source --duration-days 1
           sf project deploy start --target-org TestOrg
-          cp -r /root/.sfdx cache || echo "No sfdx cache found"
           
           echo "Running tests..."
           sf apex run test --target-org TestOrg --wait 10 --code-coverage --output-dir test-coverage
