@@ -6,32 +6,22 @@ on:
     branches: [ main ]
 
 jobs:
-  org:create:
+  test:run:
     runs-on: ubuntu-latest
-    uses: actions/cache@v3
-    with:
-      path: [ cache ]
-      key: config
     steps:
       - name: Create Scratch Org
         run: |
           npm install @salesforce/cli --global && sf --version
+          npm install jq && jq --version
+
           echo $SF_HUB_SFDXURL | sf org login sfdx-url --sfdx-url-stdin --alias DevHub --set-default-dev-hub
+
+          echo "Creating scratch org..."
           sf org create scratch --definition-file config/project-scratch-def.json --alias TestOrg --set-default --no-track-source --duration-days 1
           sf project deploy start --target-org TestOrg
           cp -r /root/.sfdx cache || echo "No sfdx cache found"
-
-  test:run:
-    runs-on: ubuntu-latest
-    uses: actions/cache@v3
-    with:
-      path: [ cache ]
-      key: config
-    steps:
-      - name: Run Tests
-        run: |
-          mv cache /root/.sfdx || echo "No sfdx cache found"
-          npm install jq && jq --version
+          
+          echo "Running tests..."
           sf apex run test --target-org TestOrg --wait 10 --code-coverage --output-dir test-coverage
 
           if [ ! -r test-coverage/test-run-id.txt ]; then
@@ -54,15 +44,6 @@ jobs:
             echoErrorMsg "The Apex test run coverage is $APEX_COVERAGE - less than 80%"
             exit 1
           fi
-
-  org:delete:
-    runs-on: ubuntu-latest
-    uses: actions/cache@v3
-    with:
-      path: [ cache ]
-      key: config
-    steps:
-      - name: Delete Scratch Org
-        run: |
-          mv cache /root/.sfdx || echo "No sfdx cache found"
+          
+          echo "Deleting scratch org..."
           sf org delete scratch --target-org TestOrg --no-prompt
