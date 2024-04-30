@@ -13,6 +13,7 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
+        
       - name: Create Scratch Org
         run: |
           echo ${{ vars.SF_HUB_SFDXURL }} > devhub.txt
