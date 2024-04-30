@@ -11,8 +11,7 @@ private class CountryLayerServiceTest {
         List<Country__c> testCountries = TestData.insertCountryRecords(10);
 
         Test.startTest();
-        CountryLayerService service = new CountryLayerService();
-        Map<String, Country__c> countriesByName = service.getCountriesByName();
+        Map<String, Country__c> countriesByName = CountryLayerService.getCountriesByName();
         Test.stopTest();
 
         System.assertEquals(10, countriesByName.size(), 'The country list size is not correct');
@@ -35,8 +34,7 @@ private class CountryLayerServiceTest {
     @isTest
     private static void getCountriesByName_NoData() {
         Test.startTest();
-        CountryLayerService service = new CountryLayerService();
-        Map<String, Country__c> countriesByName = service.getCountriesByName();
+        Map<String, Country__c> countriesByName = CountryLayerService.getCountriesByName();
         Test.stopTest();
 
         System.assert(countriesByName.isEmpty(), 'The country map size is not correct');
@@ -54,8 +52,7 @@ private class CountryLayerServiceTest {
         Test.startTest();
         try {
             System.runAs(testUser) {
-                CountryLayerService service = new CountryLayerService();
-                Map<String, Country__c> countriesByName = service.getCountriesByName();
+                Map<String, Country__c> countriesByName = CountryLayerService.getCountriesByName();
             }
         }
         catch(Exception e) {
@@ -76,8 +73,7 @@ private class CountryLayerServiceTest {
         Test.setMock(HttpCalloutMock.class, new TestData.MockHttpResponse(mockResponse, 200));
 
         Test.startTest();
-        CountryLayerService service = new CountryLayerService();
-        Map<String, CountryLayerService.ApiCountry> countriesByName = service.getDeserializedApiResponse();
+        Map<String, CountryLayerService.ApiCountry> countriesByName = CountryLayerService.getDeserializedApiResponse();
         Test.stopTest();
 
         System.assertEquals(10, countriesByName.size(), 'The country list size is not correct');
@@ -105,8 +101,8 @@ private class CountryLayerServiceTest {
 
         Test.startTest();
         try {
-            CountryLayerService service = new CountryLayerService();
-            Map<String, CountryLayerService.ApiCountry> countriesByName = service.getDeserializedApiResponse();
+            Map<String, CountryLayerService.ApiCountry> countriesByName =
+                CountryLayerService.getDeserializedApiResponse();
         }
         catch(Exception e) {
             ex = e;
@@ -132,8 +128,8 @@ private class CountryLayerServiceTest {
 
         Test.startTest();
         try {
-            CountryLayerService service = new CountryLayerService();
-            Map<String, CountryLayerService.ApiCountry> countriesByName = service.getDeserializedApiResponse();
+            Map<String, CountryLayerService.ApiCountry> countriesByName =
+                CountryLayerService.getDeserializedApiResponse();
         }
         catch(Exception e) {
             ex = e;
@@ -158,8 +154,8 @@ private class CountryLayerServiceTest {
 
         Test.startTest();
         try {
-            CountryLayerService service = new CountryLayerService();
-            Map<String, CountryLayerService.ApiCountry> countriesByName = service.getDeserializedApiResponse();
+            Map<String, CountryLayerService.ApiCountry> countriesByName =
+                CountryLayerService.getDeserializedApiResponse();
         }
         catch(Exception e) {
             ex = e;
@@ -186,8 +182,7 @@ private class CountryLayerServiceTest {
             TestData.createApiCountriesByNameMap(7);
 
         Test.startTest();
-        CountryLayerService service = new CountryLayerService();
-        service.deleteObsoleteCountries(testCountryRecordsByName, testApiCountriesByName);
+        CountryLayerService.deleteObsoleteCountries(testCountryRecordsByName, testApiCountriesByName);
         Test.stopTest();
 
         List<Country__c> countries = [SELECT Name__c FROM Country__c ORDER BY Name__c DESC];
@@ -215,8 +210,7 @@ private class CountryLayerServiceTest {
         Test.startTest();
         try {
             System.runAs(testUser) {
-                CountryLayerService service = new CountryLayerService();
-                service.deleteObsoleteCountries(testCountryRecordsByName, testApiCountriesByName);
+                CountryLayerService.deleteObsoleteCountries(testCountryRecordsByName, testApiCountriesByName);
             }
         }
         catch(Exception e) {
@@ -241,8 +235,7 @@ private class CountryLayerServiceTest {
         testApiCountriesByName.get('Test Country JKL').region = 'Europe';
 
         Test.startTest();
-        CountryLayerService service = new CountryLayerService();
-        service.upsertCountries(testCountryRecordsByName, testApiCountriesByName);
+        CountryLayerService.upsertCountries(testCountryRecordsByName, testApiCountriesByName);
         Test.stopTest();
 
         List<Country__c> countries = [SELECT Name__c, Region__c, Alpha2Code__c FROM Country__c ORDER BY Name__c ASC];
@@ -262,8 +255,7 @@ private class CountryLayerServiceTest {
             TestData.createApiCountriesByNameMap(10);
 
         Test.startTest();
-        CountryLayerService service = new CountryLayerService();
-        service.upsertCountries(new Map<String, Country__c>(), testApiCountriesByName);
+        CountryLayerService.upsertCountries(new Map<String, Country__c>(), testApiCountriesByName);
         Test.stopTest();
 
         List<Country__c> countries = [SELECT Region__c, Alpha2Code__c FROM Country__c ORDER BY Name__c ASC];
@@ -286,8 +278,7 @@ private class CountryLayerServiceTest {
         Test.startTest();
         try {
             System.runAs(testUser) {
-                CountryLayerService service = new CountryLayerService();
-                service.upsertCountries(new Map<String, Country__c>(), testApiCountriesByName);
+                CountryLayerService.upsertCountries(new Map<String, Country__c>(), testApiCountriesByName);
             }
         }
         catch(Exception e) {
