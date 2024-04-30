@@ -1,8 +1,8 @@
 {
-  "name": "salesforce-app",
+  "name": "nn-lead-countries",
   "private": true,
   "version": "1.0.0",
-  "description": "Salesforce App",
+  "description": "NN Salesforce exercise April 2024",
   "scripts": {
     "lint": "eslint **/{aura,lwc}/**/*.js",
     "test": "npm run test:unit",
