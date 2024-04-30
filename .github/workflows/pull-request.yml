@@ -26,7 +26,7 @@ jobs:
           sf apex run test --target-org TestOrg --wait 10
           sf data query --query "SELECT PercentCovered FROM ApexOrgWideCoverage" --use-tooling-api --target-org TestOrg --json > coverage.json
           
-          APEX_COVERAGE=$(jq -r '.result.records.PercentCovered' coverage.json)
+          APEX_COVERAGE=$(jq -r '.result.records[0].PercentCovered' coverage.json)
 
           echo "Org Wide Test Coverage = "$APEX_COVERAGE
 
