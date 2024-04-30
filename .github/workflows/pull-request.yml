@@ -8,13 +8,12 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    container:
+      image: salesforcedx:latest-full
     steps:
       - name: Create Scratch Org
         run: |
-          npm install @salesforce/cli --global && sf --version
-          npm install jq && jq --version
-
-          echo $SF_HUB_SFDXURL | sf org login sfdx-url --sfdx-url-stdin --alias DevHub --set-default-dev-hub
+          echo ${{ vars.SF_HUB_SFDXURL }} | sf org login sfdx-url --sfdx-url-stdin --alias DevHub --set-default-dev-hub
 
           echo "Creating scratch org..."
           sf org create scratch --definition-file config/project-scratch-def.json --alias TestOrg --set-default --no-track-source --duration-days 1
