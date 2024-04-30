@@ -23,6 +23,7 @@ jobs:
           sf project deploy start --target-org TestOrg
       
       - name: Run Tests
+        run: |
           echo "Running tests..."
           sf apex run test --target-org TestOrg --wait 10 --code-coverage --output-dir test-coverage
 
