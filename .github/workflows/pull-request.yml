@@ -12,11 +12,10 @@ jobs:
     with:
       path: [ cache ]
       key: config
-    container:
-      image: salesforcedx:latest-slim
     steps:
       - name: Create Scratch Org
         run: |
+          npm install @salesforce/cli --global && sf --version
           echo $SF_HUB_SFDXURL | sf org login sfdx-url --sfdx-url-stdin --alias DevHub --set-default-dev-hub
           sf org create scratch --definition-file config/project-scratch-def.json --alias TestOrg --set-default --no-track-source --duration-days 1
           sf project deploy start --target-org TestOrg
@@ -28,12 +27,11 @@ jobs:
     with:
       path: [ cache ]
       key: config
-    container:
-      image: salesforcedx:latest-full
     steps:
       - name: Run Tests
         run: |
           mv cache /root/.sfdx || echo "No sfdx cache found"
+          npm install jq && jq --version
           sf apex run test --target-org TestOrg --wait 10 --code-coverage --output-dir test-coverage
 
           if [ ! -r test-coverage/test-run-id.txt ]; then
@@ -63,8 +61,6 @@ jobs:
     with:
       path: [ cache ]
       key: config
-    container:
-      image: salesforcedx:latest-slim
     steps:
       - name: Delete Scratch Org
         run: |
