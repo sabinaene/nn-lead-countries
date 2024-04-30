@@ -4,7 +4,7 @@ public with sharing class CountryLayerService {
      * Fetches all the Country__c records in the org
      * @return List of all Country__c records
      */
-    public Map<String, Country__c> getCountriesByName() {
+    public static Map<String, Country__c> getCountriesByName() {
         Map<String, Country__c> existingCountriesByName = new Map<String, Country__c>();
         
         try {
@@ -36,7 +36,7 @@ public with sharing class CountryLayerService {
      * into ApiCountry wrapper object
      * @return Deserialised API response 
      */
-    public Map<String, ApiCountry> getDeserializedApiResponse() {
+    public static Map<String, ApiCountry> getDeserializedApiResponse() {
         Map<String, ApiCountry> apiCountriesByName = new Map<String, ApiCountry>();
         CountryLayerAPI__c apiSettings = CountryLayerAPI__c.getInstance();
         
@@ -82,7 +82,7 @@ public with sharing class CountryLayerService {
      * @param existingCountriesByName Country__c records mapped by Name__c
      * @param apiCountriesByName API response countries mapped by name
      */
-    public void deleteObsoleteCountries(
+    public static void deleteObsoleteCountries(
         Map<String, Country__c> existingCountriesByName,
         Map<String, ApiCountry> apiCountriesByName
     ) {
@@ -110,7 +110,7 @@ public with sharing class CountryLayerService {
      * @param existingCountriesByName Country__c records mapped by Name__c
      * @param apiCountriesByName API response countries mapped by name
      */
-    public void upsertCountries(
+    public static void upsertCountries(
         Map<String, Country__c> existingCountriesByName,
         Map<String, ApiCountry> apiCountriesByName
     ) {

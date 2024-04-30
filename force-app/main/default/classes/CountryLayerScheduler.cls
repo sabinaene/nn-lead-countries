@@ -8,12 +8,12 @@ public with sharing class CountryLayerScheduler implements Schedulable {
      */
     public class AsyncCallout implements Queueable, Database.AllowsCallouts {
         public void execute(QueueableContext qc) {
-            CountryLayerService service = new CountryLayerService();
-            Map<String, Country__c> existingCountriesByName = service.getCountriesByName();
-            Map<String, CountryLayerService.ApiCountry> apiCountriesByName = service.getDeserializedApiResponse();
+            Map<String, Country__c> existingCountriesByName = CountryLayerService.getCountriesByName();
+            Map<String, CountryLayerService.ApiCountry> apiCountriesByName =
+                CountryLayerService.getDeserializedApiResponse();
 
-            service.upsertCountries(existingCountriesByName, apiCountriesByName);
-            service.deleteObsoleteCountries(existingCountriesByName, apiCountriesByName);
+            CountryLayerService.upsertCountries(existingCountriesByName, apiCountriesByName);
+            CountryLayerService.deleteObsoleteCountries(existingCountriesByName, apiCountriesByName);
         }
     }
 }
