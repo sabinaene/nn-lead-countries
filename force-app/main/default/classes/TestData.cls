@@ -65,7 +65,7 @@ public class TestData {
     }
 
     /**
-     * InsertCountry__c records an returns map by name
+     * Insert Country__c records an returns map by name
      * @param recordCount Number of records to insert
      * @return Map of Country__c records grouped by Name__c
      */
@@ -98,6 +98,39 @@ public class TestData {
     }
 
     /**
+     * Creates a list of Lead records without inserting
+     * @param recordCount Number of records to create
+     * @param countryName Country name for Lead
+     * @return List of Lead records
+     */
+    public static List<Lead> createLeadRecords(Integer recordCount, String countryName) {
+        List<Lead> leads = new List<Lead>();
+
+        for(Integer i = 0; i < recordCount; i++) {
+            leads.add(new Lead(
+                FirstName = 'Test ' + i,
+                LastName = 'Lead ' + i,
+                Company = 'Company ' + i,
+                Country = countryName
+            ));
+        }
+
+        return leads;
+    }
+
+    /**
+     * Creates and inserts a list of Lead records
+     * @param recordCount Number of records to create
+     * @param countryName Country name for Lead
+     * @return List of Lead records after insert
+     */
+    public static List<Lead> insertLeadRecords(Integer recordCount, String countryName) {
+        List<Lead> leads = createLeadRecords(recordCount, countryName);
+        insert leads;
+        return leads;
+    }
+
+    /**
      * Generates CountryLayerAPI__c custom settings without inserting
      * @return CountryLayerAPI__c custom settings instance
      */
@@ -115,6 +148,28 @@ public class TestData {
      */
     public static CountryLayerAPI__c insertApiSettings() {
         CountryLayerAPI__c settings = createApiSettings();
+        insert settings;
+        return settings;
+    }
+
+    /**
+     * Generates GeneralSettings__c custom settings without inserting
+     * @return GeneralSettings__c custom settings instance
+     */
+    public static GeneralSettings__c createGeneralSettings() {
+        return new GeneralSettings__c(
+            SetupOwnerId = UserInfo.getUserId(),
+            Name = 'Test Settings',
+            DisableAutomation__c = true
+        );
+    }
+
+    /**
+     * Inserts GeneralSettings__c custom settings instance
+     * @return GeneralSettings__c custom settings after insert
+     */
+    public static GeneralSettings__c insertGeneralSettings() {
+        GeneralSettings__c settings = createGeneralSettings();
         insert settings;
         return settings;
     }

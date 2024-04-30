@@ -7,6 +7,7 @@ private class CountryLayerServiceTest {
      */
     @isTest
     private static void getCountriesByName() {
+        GeneralSettings__c settings = TestData.insertGeneralSettings(); // disable automation
         List<Country__c> testCountries = TestData.insertCountryRecords(10);
 
         Test.startTest();
@@ -179,6 +180,7 @@ private class CountryLayerServiceTest {
      */
     @isTest
     private static void deleteObsoleteCountries() {
+        GeneralSettings__c settings = TestData.insertGeneralSettings(); // disable automation
         Map<String, Country__c> testCountryRecordsByName = TestData.insertCountryRecordsByNameMap(10);
         Map<String, CountryLayerService.ApiCountry> testApiCountriesByName =
             TestData.createApiCountriesByNameMap(7);
@@ -205,6 +207,7 @@ private class CountryLayerServiceTest {
     private static void deleteObsoleteCountries_NoAccess() {
         Exception ex;
         User testUser = TestData.createUsers(1, 'Chatter Free User')[0];
+        GeneralSettings__c settings = TestData.insertGeneralSettings(); // disable automation
         Map<String, Country__c> testCountryRecordsByName = TestData.insertCountryRecordsByNameMap(2);
         Map<String, CountryLayerService.ApiCountry> testApiCountriesByName =
             TestData.createApiCountriesByNameMap(1);
@@ -230,6 +233,7 @@ private class CountryLayerServiceTest {
      */
     @isTest
     private static void upsertCountries() {
+        GeneralSettings__c settings = TestData.insertGeneralSettings(); // disable automation
         Map<String, Country__c> testCountryRecordsByName = TestData.insertCountryRecordsByNameMap(10);
         Map<String, CountryLayerService.ApiCountry> testApiCountriesByName =
             TestData.createApiCountriesByNameMap(11);

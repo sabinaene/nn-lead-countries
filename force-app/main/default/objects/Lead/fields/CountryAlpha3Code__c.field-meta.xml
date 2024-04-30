@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>CountryAlpha3Code__c</fullName>
+    <description>Alpha3Code for the country set in the Address field.</description>
+    <externalId>false</externalId>
+    <label>Country Alpha3Code</label>
+    <length>3</length>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>
