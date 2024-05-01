@@ -28,7 +28,7 @@ private class FlowTest {
                 leads[i].OwnerId,
                 'OwnerId is not correct' 
             );
-            System.assertEquals(now, leads[i].OwnerSince__c, 'OwnerId was not set correctly');
+            System.assertEquals(now, leads[i].OwnerSince__c, 'OwnerSince__c was not set correctly');
         }
     }
 
@@ -62,7 +62,7 @@ private class FlowTest {
                 leads[i].OwnerId,
                 'OwnerId is not correct' 
             );
-            System.assertEquals(now, leads[i].OwnerSince__c, 'OwnerId was not set correctly');
+            System.assertEquals(now, leads[i].OwnerSince__c, 'OwnerSince__c was not set correctly');
         }
     }
 
@@ -94,7 +94,7 @@ private class FlowTest {
                 leads[i].OwnerId,
                 'OwnerId is not correct' 
             );
-            System.assertEquals(now, leads[i].OwnerSince__c, 'OwnerId was not set correctly');
+            System.assertEquals(now, leads[i].OwnerSince__c, 'OwnerSince__c was not set correctly');
         }
     }
 
