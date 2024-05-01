@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlowTest xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Checks that OwnerSince__c is set for new leads.</description>
+    <flowApiName>LeadOwnerTracking</flowApiName>
+    <label>New Lead</label>
+    <testPoints>
+        <elementApiName>Start</elementApiName>
+        <parameters>
+            <leftValueReference>$Record</leftValueReference>
+            <type>InputTriggeringRecordInitial</type>
+            <value>
+                <sobjectValue>{&quot;CleanStatus&quot;:&quot;Pending&quot;,&quot;Company&quot;:&quot;My Company&quot;,&quot;FirstName&quot;:&quot;Test&quot;,&quot;IsUnreadByOwner&quot;:true,&quot;LastName&quot;:&quot;MyLead&quot;,&quot;LeadSource&quot;:&quot;Web&quot;,&quot;OwnerId&quot;:&quot;0057a00000Gd0nKAAR&quot;,&quot;Status&quot;:&quot;Open - Not Contacted&quot;,&quot;attributes&quot;:{&quot;type&quot;:{&quot;value&quot;:&quot;Lead&quot;}}}</sobjectValue>
+            </value>
+        </parameters>
+    </testPoints>
+    <testPoints>
+        <assertions>
+            <conditions>
+                <leftValueReference>$Record.OwnerSince__c</leftValueReference>
+                <operator>WasSet</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <errorMessage>OwnerSince__c was not set.</errorMessage>
+        </assertions>
+        <elementApiName>Finish</elementApiName>
+    </testPoints>
+</FlowTest>
