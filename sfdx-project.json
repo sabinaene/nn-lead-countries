@@ -14,6 +14,7 @@
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "59.0",
   "packageAliases": {
-    "nn-lead-countries": "0Ho060000008ON5CAM"
+    "nn-lead-countries": "0Ho060000008ON5CAM",
+    "nn-lead-countries@1.0.0-1": "04t06000000kodRAAQ"
   }
 }
